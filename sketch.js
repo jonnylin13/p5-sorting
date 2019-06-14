@@ -104,8 +104,8 @@ sortObj = new SelectionSort(generateData(60, 100));
 done = false;
 
 function setup() {
-  WIDTH = windowWidth;
-  HEIGHT = windowHeight;
+  WIDTH = 800;
+  HEIGHT = 600;
   createCanvas(WIDTH, HEIGHT);
   noLoop();
   sel = createSelect();
