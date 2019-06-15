@@ -8,6 +8,12 @@ class Sort {
   }
 }
 
+class MergeSort extends Sort {
+  constructor(arr) {
+    super(arr);
+  }
+}
+
 class InsertionSort extends Sort {
   constructor(arr) {
     super(arr);
@@ -17,21 +23,19 @@ class InsertionSort extends Sort {
   }
 
   iterate() {
-    // This needs to be fixed
-    if (this.i >= this.arr.length) return true;
-    else {
-      this.key = this.arr[this.i];
-
+    if (this.i < this.arr.length) {
       if (this.j >= 0 && this.arr[this.j] > this.key) {
         this.arr[this.j + 1] = this.arr[this.j];
         this.j--;
       } else {
         this.arr[this.j + 1] = this.key;
         this.i++;
+        this.key = this.arr[this.i];
         this.j = this.i - 1;
       }
+
       return false;
-    }
+    } else return true;
   }
 }
 
@@ -39,13 +43,13 @@ class SelectionSort extends Sort {
   constructor(arr) {
     super(arr);
     this.i = 0;
-    this.minIdx = 1;
+    this.minIdx = this.i;
     this.j = 1;
   }
 
   iterate() {
-    if (this.i !== this.arr.length - 1) {
-      if (this.j !== this.arr.length) {
+    if (this.i < this.arr.length) {
+      if (this.j < this.arr.length) {
         if (this.arr[this.j] < this.arr[this.minIdx]) this.minIdx = this.j;
         this.j++;
       } else {
@@ -56,8 +60,8 @@ class SelectionSort extends Sort {
 
         // Iterate
         this.i++;
+        this.minIdx = this.i;
         this.j = this.i + 1;
-        this.minIdx = this.i + 1;
         return false;
       }
     } else {
@@ -99,8 +103,6 @@ class BubbleSort extends Sort {
   }
 }
 
-sortObj = new SelectionSort(generateData(60, 100));
-
 done = false;
 
 function setup() {
@@ -111,13 +113,29 @@ function setup() {
   sel = createSelect();
   sel.option('Selection Sort');
   sel.option('Bubble Sort');
+  sel.option('Insertion Sort');
   sel.changed(newSelection);
   fps = createSelect();
+  fps.option('MIN');
+  fps.option('0.25x');
   fps.option('0.5x');
   fps.option('1x');
   fps.option('2x');
   fps.option('4x');
+  fps.option('MAX');
   fps.changed(newFPS);
+  amt = createSelect();
+  amt.option(10);
+  amt.option(25);
+  amt.option(50);
+  amt.option(75);
+  amt.option(100);
+  amt.option(150);
+  amt.option(200);
+  amt.option(500);
+  amt.changed(newSelection);
+  newFPS();
+  sortObj = new SelectionSort(generateData(amt.value(), 100));
   button = createButton('Toggle');
   reset = createButton('Reset');
   reset.mousePressed(newSelection);
@@ -147,18 +165,34 @@ function stop() {
 function newSelection() {
   noLoop();
   button.mousePressed(start);
-  let item = sel.value();
-  if (item == 'Selection Sort') {
-    sortObj = new SelectionSort(generateData(60, 100));
-  } else if (item == 'Bubble Sort') {
-    sortObj = new BubbleSort(generateData(60, 100));
+  const type = sel.value();
+  const amount = amt.value();
+
+  const data = generateData(amount, 100);
+  switch (type) {
+    case 'Selection Sort':
+      sortObj = new SelectionSort(data);
+      break;
+    case 'Bubble Sort':
+      sortObj = new BubbleSort(data);
+      break;
+    case 'Insertion Sort':
+      sortObj = new InsertionSort(data);
+      break;
   }
+
   drawArray(sortObj.getArray(), 100, sortObj);
 }
 
 function newFPS() {
   let item = fps.value();
   switch (item) {
+    case 'MIN':
+      frameRate(1);
+      break;
+    case '0.25x':
+      frameRate(7);
+      break;
     case '0.5x':
       frameRate(15);
       break;
@@ -170,6 +204,9 @@ function newFPS() {
       break;
     case '4x':
       frameRate(120);
+      break;
+    case 'MAX':
+      frameRate(1000);
       break;
     default:
       break;
@@ -186,7 +223,7 @@ function drawArray(arr, max, sortObj) {
     if (i == sortObj.i) {
       fill(color(0, 128, 255));
       stroke(color(0, 128, 255));
-    } else if (i == sortObj.minIdx || i == sortObj.key) {
+    } else if (i == sortObj.minIdx) {
       fill(color(128, 0, 0));
       stroke(color(128, 0, 0));
     } else if (i == sortObj.j) {
